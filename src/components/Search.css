@@ -1,0 +1,53 @@
+#search {
+  display: flex;
+  flex-flow: column nowrap;
+
+  padding: 1rem 0;
+}
+
+#searchgroups {
+  display:flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-flow: row wrap;
+  flex-grow: 1; /* prevent contenteditable div from wrapping */
+}
+
+.searchgroup {
+  align-items: center;
+
+  /* this prevents a final space being ignored, see SO answer for context */
+  /* https://stackoverflow.com/a/39334882 */
+  white-space: pre-wrap;
+
+  display: inline-block; /* required to make min-(height|width) work */
+  font-size: 18px;
+  min-height: 1em;
+  margin-left: 4px;
+  padding: 4px;
+
+  background-color: #D3D3D3; /* light grey */
+  border-radius: 2px;
+
+  border-style: solid;
+  border-width: 1px;
+  border-color: white;
+}
+
+.searchgroup:focus {
+  /*border-style: solid;*/
+  /*border-width: 1px;*/
+  border-color: black;
+}
+
+.searchgroup:empty::before {
+  content: 'Search here';
+  color: gray;
+}
+
+#searchgroup-prompt {
+  background-color: white; /* light grey */
+  color: #ccc;
+  font-size: 16px;
+  margin-left: 1rem;
+}

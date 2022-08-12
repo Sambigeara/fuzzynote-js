@@ -1,5 +1,10 @@
 .App {
-  text-align: center;
+  /*text-align: center;*/
+
+  /* custom */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .App-logo {
@@ -35,4 +40,20 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+#canvas {
+  display: flex;
+  justify-content: center;
+}
+
+#board {
+  display: flex;
+  justify-content: center;
+  flex-flow: column nowrap;
+
+  padding: 0px 20px;
+  flex-grow: 1;
+  max-width: 60rem;
+  min-width: 0;
 }

@@ -1,0 +1,43 @@
+#listitem-placeholder {
+  padding: 4px;
+  color: grey;
+}
+
+#listitems {
+  /*display: flex;*/
+  /*flex-flow: column nowrap;*/
+  /*flex-grow: 1; [> prevent contenteditable div from wrapping <]*/
+  /*white-space: pre-wrap; [> this prevents multiple contiguous spaces only showing as one <]*/
+}
+
+.listitem {
+  outline: none;
+  padding: 4px;
+  margin: 2px 0;
+  min-height: 20px;
+  /*white-space: pre-wrap; /* this F's with quill positioning */
+}
+
+.listitem:empty::before {
+  pointer-events: none;
+  content: 'Type something...';
+  color: lightgray;
+}
+
+.listitem:empty:focus::before {
+  content: none;
+}
+
+.listitem-metadata {
+  margin-left: 1rem;
+  padding: 0 2px;
+}
+
+.listitem-friend {
+  background: #a9a9a9;
+}
+
+.listitem-config {
+  color: white;
+  background: green;
+}
