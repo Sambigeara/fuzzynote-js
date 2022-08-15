@@ -12,21 +12,21 @@
 
 .listitem {
   outline: none;
-  padding: 4px;
-  margin: 2px 0;
+  padding: 0 4px;
+  margin: 4px 0;
   min-height: 20px;
   /*white-space: pre-wrap; /* this F's with quill positioning */
 }
 
-.listitem:empty::before {
-  pointer-events: none;
-  content: 'Type something...';
-  color: lightgray;
-}
+/*.listitem:empty::before {*/
+  /*pointer-events: none;*/
+  /*content: 'Type something...';*/
+  /*color: lightgray;*/
+/*}*/
 
-.listitem:empty:focus::before {
-  content: none;
-}
+/*.listitem:empty:focus::before {*/
+  /*content: none;*/
+/*}*/
 
 .listitem-metadata {
   margin-left: 1rem;
@@ -44,5 +44,20 @@
 
 /* quill override */
 .ql-editor {
-  padding: 4px;
+  padding: 2px 4px;
+}
+
+/* for the placeholder */
+.ql-editor.ql-blank::before {
+  left: 5px;
+  /*position: inherit;*/
+}
+
+.ql-container {
+  font-size: 16px;
+  font-family: Consolas, FreeMono, monospace;
+}
+
+.ql-container.ql-snow {
+  border: none;
 }

@@ -22,6 +22,7 @@ export function Listitem(props: {ytext: Y.Text}) {
         theme="snow"
         value={value}
         onChange={setValue}
+        placeholder={'Type something...'}
         modules={{
           //cursors: true,
           toolbar: false,

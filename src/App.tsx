@@ -1,9 +1,10 @@
 import * as Y from 'yjs'
 import { WebrtcProvider } from 'y-webrtc'
+import { IndexeddbPersistence } from 'y-indexeddb'
 //import QuillCursors from 'quill-cursors'
 //import { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Listitem } from "./components/Listitem"
 import { Navbar } from "./components/Navbar"
 import { Search } from "./components/Search"
@@ -11,34 +12,43 @@ import './App.css';
 
 //Quill.register('modules/cursors', QuillCursors)
 
-const ydoc = new Y.Doc();
-
 function App() {
+  const ydoc = useMemo(() => new Y.Doc(), []);
+  const roomName = 'listitems';
+  new IndexeddbPersistence(roomName, ydoc)
+  const yarray: Y.Array<string> = ydoc.getArray(roomName);
+
   const [listitems, setListitems] = useState<string[]>([]);
+
+  yarray.observe(() => {
+      setListitems(yarray.toArray());
+  });
 
   useEffect(() => {
     const provider = new WebrtcProvider('fuzzynote testtt', ydoc);
-    const yarray: Y.Array<string> = ydoc.getArray('listitems');
-    yarray.observeDeep(() => {
-        setListitems(yarray.toArray());
-    });
     return () => {
       if (provider) {
         provider.destroy();
-        //ydoc.destroy();
+        ydoc.destroy();
       }
     };
-  }, []);
+  }, [ydoc]);
 
   const createItem = (() => {
     const now = Date.now().toLocaleString();
+
     // generate random ListItems on button click
-    setListitems([...listitems, ...[...Array(5).keys()].map(x => x + ' ' + now)]);
+    //yarray.push([...Array(10).keys()].map(x => x + ' ' + now));
+
+    yarray.push([''])
   });
 
   const generateNewListitem = ((k: string, t: string) => {
     const newText = ydoc.getText(k);
-    newText.insert(0, t);
+    // fill with stub data for demo purposes
+    if (!newText.length) {
+      newText.insert(0, t);
+    }
     return newText;
   });
 
