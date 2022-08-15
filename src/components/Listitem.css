@@ -41,3 +41,8 @@
   color: white;
   background: green;
 }
+
+/* quill override */
+.ql-editor {
+  padding: 4px;
+}

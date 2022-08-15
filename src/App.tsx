@@ -1,34 +1,46 @@
 import * as Y from 'yjs'
 import { WebrtcProvider } from 'y-webrtc'
-import { QuillBinding } from 'y-quill'
 //import QuillCursors from 'quill-cursors'
-//import ReactQuill, { Quill } from 'react-quill';
+//import { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import React, { useEffect, useState } from 'react';
-import { Listitems } from "./components/Listitems"
+import { useEffect, useState } from 'react';
+import { Listitem } from "./components/Listitem"
 import { Navbar } from "./components/Navbar"
 import { Search } from "./components/Search"
 import './App.css';
 
 //Quill.register('modules/cursors', QuillCursors)
 
-function App() {
-  // A Yjs document holds the shared data
-  //const ydoc = new Y.Doc();
-  //const yarray: Y.Array<Y.Text> = ydoc.getArray('main')
-  //const [baseList, setBaseList] = useState(yarray);
-  //useEffect(() => {
-    //yarray.observeDeep(() => {
-      //setBaseList(yarray);
-    //});
-    ////return () => (yarray.unobserveDeep(()=>{;};));
-  //});
+const ydoc = new Y.Doc();
 
-  const fakeListitems = ["just some random note", "the quick brown fox was how a famous sentence started that I can't remember"];
-  //baseList.push([new Y.Text("just some random note")])
-  //baseList.push([new Y.Text("the quick brown fox was how a famous sentence started that I can't remember")])
-  //yarray.push([new Y.Text("just some random note")])
-  //yarray.push([new Y.Text("the quick brown fox was how a famous sentence started that I can't remember")])
+function App() {
+  const [listitems, setListitems] = useState<string[]>([]);
+
+  useEffect(() => {
+    const provider = new WebrtcProvider('fuzzynote testtt', ydoc);
+    const yarray: Y.Array<string> = ydoc.getArray('listitems');
+    yarray.observeDeep(() => {
+        setListitems(yarray.toArray());
+    });
+    return () => {
+      if (provider) {
+        provider.destroy();
+        //ydoc.destroy();
+      }
+    };
+  }, []);
+
+  const createItem = (() => {
+    const now = Date.now().toLocaleString();
+    // generate random ListItems on button click
+    setListitems([...listitems, ...[...Array(5).keys()].map(x => x + ' ' + now)]);
+  });
+
+  const generateNewListitem = ((k: string, t: string) => {
+    const newText = ydoc.getText(k);
+    newText.insert(0, t);
+    return newText;
+  });
 
   return (
     <div className="App">
@@ -36,12 +48,19 @@ function App() {
       <div id="canvas">
         <div id="board">
           <Search />
-          <Listitems items={fakeListitems}/>
+          <button onClick={() => createItem()}>Add item</button>
+          <div id="listitems">
+            {listitems.map((t, i) => <Listitem key={i}
+                                               ytext={generateNewListitem(i.toString(), t)} />)}
+          </div>
         </div>
       </div>
     </div>
   );
-          //<Listitems items={yarray}/>}
+          //<div id="listitems">
+            //{yarray.map((i) => <div className="listitem" key={i}>{i}</div>)}
+          //</div>
+          //</div>
 }
 
 export default App;
