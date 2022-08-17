@@ -1,76 +1,114 @@
-import * as Y from 'yjs'
-import { WebrtcProvider } from 'y-webrtc'
-import { IndexeddbPersistence } from 'y-indexeddb'
+import * as Y from "yjs";
+import { WebrtcProvider } from "y-webrtc";
+import { IndexeddbPersistence } from "y-indexeddb";
 //import QuillCursors from 'quill-cursors'
 //import { Quill } from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import { useEffect, useMemo, useState } from 'react';
-import { Listitem } from "./components/Listitem"
-import { Navbar } from "./components/Navbar"
-import { Search } from "./components/Search"
-import './App.css';
+import "react-quill/dist/quill.snow.css";
+import { useEffect, useMemo, useState } from "react";
+import { Listitem } from "./components/Listitem";
+import { Navbar } from "./components/Navbar";
+import { Search } from "./components/Search";
+//import useKeyPress from "./lib/utils";
+import "./App.css";
 
 //Quill.register('modules/cursors', QuillCursors)
 
 function App() {
+  //const isCtrl: boolean = useKeyPress('Control');
   const ydoc = useMemo(() => new Y.Doc(), []);
-  const roomName = 'listitems';
-  new IndexeddbPersistence(roomName, ydoc)
-  const yarray: Y.Array<string> = ydoc.getArray(roomName);
+  //new IndexeddbPersistence('listitemIds', ydoc)
+  const yarray: Y.Array<string> = ydoc.getArray("listitemIds");
 
-  const [listitems, setListitems] = useState<string[]>([]);
+  const [listitemIds, setListitemIds] = useState<string[]>([]);
 
   yarray.observe(() => {
-      setListitems(yarray.toArray());
+    setListitemIds(yarray.toArray());
   });
 
   useEffect(() => {
-    const provider = new WebrtcProvider('fuzzynote testtt', ydoc);
+    const provider = new WebrtcProvider("fuzzynote testtt", ydoc);
     return () => {
       if (provider) {
         provider.destroy();
-        ydoc.destroy();
       }
+      ydoc.destroy();
     };
   }, [ydoc]);
 
-  const createItem = (() => {
-    const now = Date.now().toLocaleString();
+  const [currentX, setCurrentX] = useState(0);
+  const [currentY, setCurrentY] = useState(-1);
+  const [searchGroups, setSearchGroups] = useState([""]);
 
-    // generate random ListItems on button click
-    //yarray.push([...Array(10).keys()].map(x => x + ' ' + now));
-
-    yarray.push([''])
-  });
-
-  const generateNewListitem = ((k: string, t: string) => {
-    const newText = ydoc.getText(k);
-    // fill with stub data for demo purposes
-    if (!newText.length) {
-      newText.insert(0, t);
+  // Just in case the child component forgets to prevent deletion of final search group
+  useEffect(() => {
+    if (!searchGroups.length) {
+      setSearchGroups([""]);
     }
-    return newText;
-  });
+  }, [searchGroups.length]);
+
+  const createListitem = (idx: number) => () => {
+    const newName = Date.now().toLocaleString(); // TODO a better unique name generator
+    const newText = ydoc.getText(newName);
+    const prefix = searchGroups.join(" ").trim();
+    newText.insert(0, prefix + (prefix.length > 0 ? " " : ""));
+    yarray.insert(idx + 1, [newName]);
+    setCurrentX(-1);
+    setCurrentY(idx + 1);
+  };
+
+  const deleteListItem = (idx: number) => (goToPrevious: boolean) => {
+    const newX = goToPrevious ? -1 : 0; // TODO maintain offset for ctrl-d
+    const newY = goToPrevious ? idx - 1 : idx;
+    // ctrl d
+    //const newLocalX = localX === null ? 0 : localX.index;
+    //props.deleteListitemFn(newLocalX, props.offsetY);
+    yarray.delete(idx);
+    setCurrentX(newX);
+    setCurrentY(newY < yarray.length ? newY : yarray.length - 1);
+  };
+
+  const navigate = (idx: number, direction: "up" | "down") => () => {
+    setCurrentY(
+      direction === "up"
+        ? idx >= 0
+          ? idx - 1
+          : 0
+        : idx + 1 < yarray.length
+        ? idx + 1
+        : yarray.length - 1
+    );
+  };
 
   return (
     <div className="App">
       <Navbar />
       <div id="canvas">
         <div id="board">
-          <Search />
-          <button onClick={() => createItem()}>Add item</button>
+          <Search
+            activeSearch={currentY === -1} // if listitems are present and active, it'll override focus in this element
+            searchGroups={searchGroups}
+            setSearchGroupsFn={setSearchGroups}
+            createListitemFn={createListitem(-1)}
+            arrowDownFn={navigate(0, "down")}
+          />
           <div id="listitems">
-            {listitems.map((t, i) => <Listitem key={i}
-                                               ytext={generateNewListitem(i.toString(), t)} />)}
+            {listitemIds.map((n, i) => (
+              <Listitem
+                key={n}
+                offsetX={currentX}
+                ytext={ydoc.getText(n)}
+                createListitemFn={createListitem(i)}
+                deleteListitemFn={deleteListItem(i)}
+                arrowUpFn={navigate(i, "up")}
+                arrowDownFn={navigate(i, "down")}
+                isActive={currentY === i}
+              />
+            ))}
           </div>
         </div>
       </div>
     </div>
   );
-          //<div id="listitems">
-            //{yarray.map((i) => <div className="listitem" key={i}>{i}</div>)}
-          //</div>
-          //</div>
 }
 
 export default App;

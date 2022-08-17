@@ -19,13 +19,13 @@
 }
 
 /*.listitem:empty::before {*/
-  /*pointer-events: none;*/
-  /*content: 'Type something...';*/
-  /*color: lightgray;*/
+/*pointer-events: none;*/
+/*content: 'Type something...';*/
+/*color: lightgray;*/
 /*}*/
 
 /*.listitem:empty:focus::before {*/
-  /*content: none;*/
+/*content: none;*/
 /*}*/
 
 .listitem-metadata {

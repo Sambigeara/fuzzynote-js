@@ -6,7 +6,7 @@
 }
 
 #searchgroups {
-  display:flex;
+  display: flex;
   justify-content: flex-start;
   align-items: center;
   flex-flow: row wrap;
@@ -26,7 +26,7 @@
   margin-left: 4px;
   padding: 4px;
 
-  background-color: #D3D3D3; /* light grey */
+  background-color: #d3d3d3; /* light grey */
   border-radius: 2px;
 
   border-style: solid;
@@ -41,7 +41,7 @@
 }
 
 .searchgroup:empty::before {
-  content: 'Search here';
+  content: "Search here";
   color: gray;
 }
 
