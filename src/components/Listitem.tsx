@@ -6,18 +6,19 @@ import { useEffect, useState, useRef } from "react";
 import "./Listitem.css";
 
 export function Listitem(props: {
-  ytext: Y.Text;
+  //ytext: Y.Text;
+  text: string,
   offsetX: number;
   isActive: boolean;
   createListitemFn: any;
   deleteListitemFn: any;
+  updateTextFn: any;
   arrowUpFn: any;
   arrowDownFn: any;
 }) {
-  const [value, setValue] = useState(props.ytext.toString());
-  //const [reactQuill, setReactQuill] = useState<ReactQuill | null>(null);
-  const [reactQuill, setReactQuill] = useState<any>(null);
-  //const reactQuillRef = useRef<ReactQuill | null>(null);
+  //const [value, setValue] = useState(props.ytext.toString());
+  //const [value, setValue] = useState(props.text);
+  const reactQuillRef = useRef<any>(null);
 
   const disableEnter = (editor: any) => {
     const keyboard = editor.getModule("keyboard");
@@ -27,9 +28,9 @@ export function Listitem(props: {
 
   // A Yjs document holds the shared data
   useEffect(() => {
-    if (!reactQuill) return;
+    if (!reactQuillRef) return;
     //const editor = (reactQuillRef.current as ReactQuill).getEditor();
-    const editor = reactQuill.getEditor();
+    const editor = reactQuillRef.current.getEditor();
 
     // Prevent Enter handling (unsure how to do this otherwise as it appears that we can't override `Enter`
     // https://github.com/quilljs/quill/issues/2423
@@ -39,7 +40,7 @@ export function Listitem(props: {
     disableEnter(editor);
 
     // need to bind before running focus check, otherwise Enter still has default behaviour
-    const binding = new QuillBinding(props.ytext, editor);
+    //const binding = new QuillBinding(props.ytext, editor);
 
     if (props.isActive) {
       editor.focus();
@@ -50,48 +51,49 @@ export function Listitem(props: {
     }
 
     return () => {
-      binding.destroy();
+      //binding.destroy();
     };
-  }, [reactQuill, props.ytext, props.isActive, props.offsetX]);
+  //}, [reactQuill, props.ytext, props.isActive, props.offsetX]);
+  }, [props.isActive, props.offsetX]);
 
   const [isEmpty, setIsEmpty] = useState(true);
   useEffect(() => {
-    if (!reactQuill) return;
-    const editor = reactQuill.getEditor();
+    if (!reactQuillRef) return;
+    const editor = reactQuillRef.current.getEditor();
     editor.getText().trim().length === 0 ? setIsEmpty(true) : setIsEmpty(false);
-  });
+  }, [reactQuillRef]);
 
   const handleKeyDown = (e: any) => {
     if (e.key === "Enter") {
       e.preventDefault();
       props.createListitemFn();
-    } else if (isEmpty && e.key === "Backspace") {
-      props.deleteListitemFn(true);
+    //} else if (isEmpty && e.key === "Backspace") {
+      //props.deleteListitemFn(true);
     } else if (e.key === "d" && e.ctrlKey) {
       e.preventDefault(); // otherwise first char of newly focused element is deleted
       props.deleteListitemFn(false);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      props.arrowUpFn();
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      props.arrowDownFn();
+    //} else if (e.key === "ArrowUp") {
+      //e.preventDefault();
+      //props.arrowUpFn();
+    //} else if (e.key === "ArrowDown") {
+      //e.preventDefault();
+      //props.arrowDownFn();
     }
   };
 
   return (
     <div className="listitem">
       <ReactQuill
-        ref={(el: any) => setReactQuill(el)}
-        //ref={reactQuillRef}
+        ref={reactQuillRef}
         theme="snow"
-        value={value}
-        onChange={setValue}
+        value={props.text}
+        onChange={props.updateTextFn}
         onKeyDown={handleKeyDown}
         placeholder={"Type something..."}
         modules={{
           //cursors: true,
           toolbar: false,
+          //magicUrl: true,
           history: {
             // Local undo shouldn't undo changes
             // from remote users

@@ -64,6 +64,7 @@ function SearchGroup(props: {
       onKeyDown={handleKeyDown}
       onInput={(e) => handleChange(e)}
       contentEditable
+      suppressContentEditableWarning={true}
       //tabIndex={0}
     >
       {props.text}
