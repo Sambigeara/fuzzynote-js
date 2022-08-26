@@ -51,11 +51,15 @@
 .ql-editor.ql-blank::before {
   left: 5px;
   /*position: inherit;*/
+  /*width: min-content;*/
+  /*width: auto;*/
 }
 
 .ql-container {
   font-size: 16px;
   font-family: Consolas, FreeMono, monospace;
+  /*width: -moz-fit-content;*/
+  /*width: fit-content;*/
 }
 
 .ql-container.ql-snow {
