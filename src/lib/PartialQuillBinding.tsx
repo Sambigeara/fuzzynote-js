@@ -16,36 +16,35 @@ export class PartialQuillBinding {
     this.search = search;
     this.doc = type.doc;
 
-    this._typeObserver = (_event: any, transaction: any) => {
-      if (transaction.origin === this)
-        return;
-      this.quill.setText(this.textWithoutSearch(this.type.toString()));
-      // TODO add prefix
-      //quill.updateContents(event.delta, this);
+    this._typeObserver = (event: any, transaction: any) => {
+      if (transaction.origin === this) return;
+      quill.updateContents(event.delta, this);
     };
     this.type.observe(this._typeObserver);
 
-    this._quillObserver = (delta: any, _oldContents: any, source: string, _origin: any) => {
-      if (source !== "user")
-        return;
-      //if (origin === this) return;
+    this._quillObserver = (delta: any, _oldContents: any, source: any) => {
+      if (source === this) return;
       this.doc.transact(() => {
-        let ops = [];
-        if (this.type.toString().startsWith(search)) {
+        let ops: any = [];
+        const curString = this.type.toString();
+        if (search.length > 0 && curString.startsWith(search)) {
           ops = [{ retain: search.length }, ...delta.ops];
         } else {
           ops = delta.ops;
         }
-        this.type.applyDelta(ops);
+        this.doc.transact(() => {
+          this.type.applyDelta(ops);
+        });
       }, this);
     };
     this.quill.on('text-change', this._quillObserver);
-    this.quill.setText(this.type.toString(), this);
-  }
 
-  textWithoutSearch = (text: string): string => {
-    return text.startsWith(this.search) ? text.slice(this.search.length) : text;
-  };
+    let text = this.type.toString();
+    if (text.startsWith(search)) {
+      text = text.slice(search.length);
+    }
+    this.quill.setText(text, this);
+  }
 
   destroy() {
     this.type.unobserve(this._typeObserver);

@@ -44,7 +44,6 @@ function App() {
   const [currentY, setCurrentY] = useState(-1);
   const createListitem = (idx: number) => () => {
     const newName = crypto.randomUUID();
-    //const newText = new Y.Text(getSearchString());
     const ytext = ydoc.getText(newName);
 
     ydoc.transact(() => {
