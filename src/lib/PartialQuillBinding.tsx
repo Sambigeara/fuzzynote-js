@@ -8,7 +8,12 @@ export class PartialQuillBinding {
   doc: any;
 
   _typeObserver: (event: any, transaction: any) => void;
-  _quillObserver: (delta: any, oldContents: any, source: string, origin: any) => void;
+  _quillObserver: (
+    delta: any,
+    oldContents: any,
+    source: string,
+    origin: any
+  ) => void;
 
   constructor(type: Y.Text, quill: any, search: string) {
     this.type = type;
@@ -37,7 +42,7 @@ export class PartialQuillBinding {
         });
       }, this);
     };
-    this.quill.on('text-change', this._quillObserver);
+    this.quill.on("text-change", this._quillObserver);
 
     let text = this.type.toString();
     if (text.startsWith(search)) {
@@ -48,6 +53,6 @@ export class PartialQuillBinding {
 
   destroy() {
     this.type.unobserve(this._typeObserver);
-    this.quill.off('text-change', this._quillObserver);
+    this.quill.off("text-change", this._quillObserver);
   }
 }

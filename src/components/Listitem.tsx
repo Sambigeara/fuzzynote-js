@@ -9,7 +9,7 @@ import { PartialQuillBinding } from "../lib/PartialQuillBinding";
 
 export function Listitem(props: {
   ytext: Y.Text;
-  searchString: string,
+  searchString: string;
   offsetX: number;
   isActive: boolean;
   createListitemFn: any;
@@ -17,7 +17,6 @@ export function Listitem(props: {
   arrowUpFn: any;
   arrowDownFn: any;
 }) {
-
   const reactQuillRef: any = useRef(null);
   const quill: any = useRef(null);
   useEffect(() => {
@@ -31,13 +30,17 @@ export function Listitem(props: {
           userOnly: true,
         },
       },
-      placeholder: 'Type something...',
-      theme: 'snow' // 'bubble' is also great
-    })
+      placeholder: "Type something...",
+      theme: "snow", // 'bubble' is also great
+    });
 
     // need to bind before running focus check, otherwise Enter still has default behaviour
     //const binding = new QuillBinding(props.ytext, quill.current);
-    const binding = new PartialQuillBinding(props.ytext, quill.current, props.searchString);
+    const binding = new PartialQuillBinding(
+      props.ytext,
+      quill.current,
+      props.searchString
+    );
 
     // Prevent Enter handling (unsure how to do this otherwise as it appears that we can't override `Enter`
     // https://github.com/quilljs/quill/issues/2423
@@ -76,9 +79,9 @@ export function Listitem(props: {
     };
 
     const cur = reactQuillRef.current;
-    cur.addEventListener('keydown', handleKeyDown);
+    cur.addEventListener("keydown", handleKeyDown);
     return () => {
-      cur.removeEventListener('keydown', handleKeyDown);
+      cur.removeEventListener("keydown", handleKeyDown);
     };
   }, [props, isEmpty]); // TODO destructure props
 
@@ -94,20 +97,21 @@ export function Listitem(props: {
 
   useEffect(() => {
     const emptyHandler = () => {
-        quill.current.getText().trim().length === 0 ? setIsEmpty(true) : setIsEmpty(false);
+      quill.current.getText().trim().length === 0
+        ? setIsEmpty(true)
+        : setIsEmpty(false);
     };
 
-    const cur = reactQuillRef.current
-    cur.addEventListener('keyup', emptyHandler)
+    const cur = reactQuillRef.current;
+    cur.addEventListener("keyup", emptyHandler);
     return () => {
-      cur.removeEventListener('keyup', emptyHandler)
+      cur.removeEventListener("keyup", emptyHandler);
     };
   }, []);
 
   return (
     <div className="listitem">
-      <div ref={reactQuillRef}>
-      </div>
+      <div ref={reactQuillRef}></div>
     </div>
   );
 }

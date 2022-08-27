@@ -13,7 +13,11 @@ import "./App.css";
 
 function App() {
   const ydoc = useMemo(() => new Y.Doc(), []);
-  const yarray: Y.Array<string> = useMemo(() => ydoc.getArray("listitemTexts"), [ydoc]);
+  const yarray: Y.Array<string> = useMemo(
+    () => ydoc.getArray("listitemTexts"),
+    [ydoc]
+  );
+  const ymap: Y.Map<Y.Text> = useMemo(() => ydoc.getMap("listitemMap"), [ydoc]);
   //new IndexeddbPersistence('listitemIds', ydoc)
 
   useEffect(() => {
@@ -26,28 +30,33 @@ function App() {
     };
   }, [ydoc]);
 
+  const isMatch = (text: string) => {
+    if (!text.length) return true;
+    for (const s of searchGroups) {
+      if (s.length > 0 && !text.includes(s)) return false;
+    }
+    return true;
+  };
+
+  const [searchGroups, setSearchGroups] = useState([""]);
   const [listitemNames, setListitemNames] = useState<string[]>([]);
+
   useEffect(() => {
     yarray.observe(() => {
       setListitemNames(yarray.toArray());
     });
   }, [yarray]);
 
-  const [searchGroups, setSearchGroups] = useState([""]);
-  useEffect(() => {
-    if (!searchGroups.length) {
-      setSearchGroups([""]);
-    }
-  }, [searchGroups.length]);
-
   const [currentX, setCurrentX] = useState(0);
   const [currentY, setCurrentY] = useState(-1);
   const createListitem = (idx: number) => () => {
     const newName = crypto.randomUUID();
-    const ytext = ydoc.getText(newName);
+    //const ytext = ydoc.getText(newName);
 
     ydoc.transact(() => {
-      ytext.insert(0, getSearchString());
+      const ytext = new Y.Text(getSearchString());
+      ymap.set(newName, ytext);
+      //ytext.insert(0, getSearchString());
       yarray.insert(idx + 1, [newName]);
     });
 
@@ -60,7 +69,9 @@ function App() {
     const newY = goToPrevious ? idx - 1 : idx;
 
     ydoc.transact(() => {
+      const key = yarray.get(idx);
       yarray.delete(idx);
+      ymap.delete(key);
     });
 
     setCurrentX(newX);
@@ -97,19 +108,21 @@ function App() {
             arrowDownFn={navigate(0, "down")}
           />
           <div id="listitems">
-            {listitemNames.map((n, i) => (
-              <Listitem
-                key={n}
-                offsetX={currentX}
-                ytext={ydoc.getText(n)} // TODO ensure never undefined
-                searchString={getSearchString()}
-                createListitemFn={createListitem(i)}
-                deleteListitemFn={deleteListItem(i)}
-                arrowUpFn={navigate(i, "up")}
-                arrowDownFn={navigate(i, "down")}
-                isActive={currentY === i}
-              />
-            ))}
+            {listitemNames.map((n, i) =>
+              isMatch((ymap.get(n) ?? new Y.Text()).toString()) ? (
+                <Listitem
+                  key={n}
+                  offsetX={currentX}
+                  ytext={ymap.get(n) ?? new Y.Text()} // TODO ensure never undefined
+                  searchString={getSearchString()}
+                  createListitemFn={createListitem(i)}
+                  deleteListitemFn={deleteListItem(i)}
+                  arrowUpFn={navigate(i, "up")}
+                  arrowDownFn={navigate(i, "down")}
+                  isActive={currentY === i}
+                />
+              ) : null
+            )}
           </div>
         </div>
       </div>

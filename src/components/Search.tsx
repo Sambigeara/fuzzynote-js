@@ -4,6 +4,7 @@ import "./Search.css";
 function SearchGroup(props: {
   text: string;
   isActive: boolean;
+  offset: number;
   createListitemFn: any;
   updateSearchGroupFn: any;
   deleteSearchGroupFn: any;
@@ -16,6 +17,24 @@ function SearchGroup(props: {
     if (props.isActive) {
       el.current.focus();
     }
+  }, [props.isActive]);
+
+  useEffect(() => {
+    if (!el.current) return;
+    const selection = window.getSelection();
+    if (selection) {
+      let node = el.current;
+      if (node.firstChild) node = node.firstChild;
+      const r = document.createRange();
+      try {
+        r.setStart(node, props.offset);
+        //r.setEnd(node, props.offset);
+        selection.removeAllRanges();
+        selection.addRange(r);
+      } catch (e) {
+        //console.log(e);
+      }
+    }
   });
 
   //const [inputText, setInputText] = useState(props.text);
@@ -23,19 +42,24 @@ function SearchGroup(props: {
     if (e.currentTarget.textContent === "") {
       e.currentTarget.innerHTML = "";
     }
+
+    let offset = 0;
+    const selection = document.getSelection();
+    if (selection) {
+      offset = selection.anchorOffset;
+    }
+
     //setInputText(e.target.value);
     //setInputText(e.currentTarget.textContent);
     //props.updateSearchGroupFn(e.target.value);
-    props.updateSearchGroupFn(e.currentTarget.textContent);
+    props.updateSearchGroupFn(e.currentTarget.textContent, offset);
   };
 
   const handleKeyDown = (e: any) => {
-    const selection: Selection | null = document.getSelection();
-    if (!selection) return;
-
-    const offset = selection.anchorOffset;
+    const selection = window.getSelection();
+    const offset = selection?.anchorOffset;
     const text = e.target.textContent;
-    const len = text.length;
+    //const len = text.length;
     //const offset = e.target.selectionStart;
     //const text = e.target.value;
 
@@ -88,12 +112,13 @@ export function Search(props: {
   arrowDownFn: any;
 }) {
   const [searchIdx, setSearchIdx] = useState(0);
+  const [offset, setOffset] = useState(0);
 
-  const updateSearchGroup = (idx: number) => (newText: string) => {
+  const updateSearchGroup = (idx: number) => (newText: string, x?: number) => {
     props.setSearchGroupsFn((s: string[]) => {
-      s[idx] = newText;
-      return s;
+      return [...s.slice(0, idx), newText, ...s.slice(idx + 1)];
     });
+    if (x) setOffset(x);
   };
 
   const deleteSearchGroup = (idx: number) => () => {
@@ -119,9 +144,10 @@ export function Search(props: {
       <div id="searchgroups">
         {props.searchGroups.map((s, i) => (
           <SearchGroup
-            text={s}
             key={i}
+            text={s}
             isActive={props.activeSearch && searchIdx === i}
+            offset={offset}
             createListitemFn={props.createListitemFn}
             updateSearchGroupFn={updateSearchGroup(i)}
             deleteSearchGroupFn={deleteSearchGroup(i)}
