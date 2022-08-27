@@ -16,28 +16,24 @@ function SearchGroup(props: {
   useEffect(() => {
     if (props.isActive) {
       el.current.focus();
-    }
-  }, [props.isActive]);
 
-  useEffect(() => {
-    if (!el.current) return;
-    const selection = window.getSelection();
-    if (selection) {
-      let node = el.current;
-      if (node.firstChild) node = node.firstChild;
-      const r = document.createRange();
-      try {
-        r.setStart(node, props.offset);
-        //r.setEnd(node, props.offset);
-        selection.removeAllRanges();
-        selection.addRange(r);
-      } catch (e) {
-        //console.log(e);
+      const selection = window.getSelection();
+      if (selection) {
+        let node = el.current;
+        if (node.firstChild) node = node.firstChild;
+        const r = document.createRange();
+        try {
+          r.setStart(node, props.offset);
+          //r.setEnd(node, props.offset);
+          selection.removeAllRanges();
+          selection.addRange(r);
+        } catch (e) {
+          //console.log(e);
+        }
       }
     }
   });
 
-  //const [inputText, setInputText] = useState(props.text);
   const handleChange = (e: any) => {
     if (e.currentTarget.textContent === "") {
       e.currentTarget.innerHTML = "";
@@ -49,9 +45,6 @@ function SearchGroup(props: {
       offset = selection.anchorOffset;
     }
 
-    //setInputText(e.target.value);
-    //setInputText(e.currentTarget.textContent);
-    //props.updateSearchGroupFn(e.target.value);
     props.updateSearchGroupFn(e.currentTarget.textContent, offset);
   };
 
@@ -59,9 +52,6 @@ function SearchGroup(props: {
     const selection = window.getSelection();
     const offset = selection?.anchorOffset;
     const text = e.target.textContent;
-    //const len = text.length;
-    //const offset = e.target.selectionStart;
-    //const text = e.target.value;
 
     if (e.key === "Enter") {
       e.preventDefault();
@@ -70,11 +60,15 @@ function SearchGroup(props: {
       e.preventDefault();
       const leftText = text.slice(0, offset);
       const rightText = text.slice(offset);
-      //setInputText(leftText);
       props.splitSearchGroupFn([leftText, rightText]);
     } else if (e.key === "d" && e.ctrlKey) {
       e.preventDefault(); // otherwise first char of newly focused element is deleted
       props.deleteSearchGroupFn();
+    } else if (e.key === "Backspace") {
+      if (text.length === 0) {
+        props.deleteSearchGroupFn();
+        e.preventDefault();
+      }
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       props.arrowDownFn();
@@ -122,14 +116,19 @@ export function Search(props: {
   };
 
   const deleteSearchGroup = (idx: number) => () => {
-    props.setSearchGroupsFn((s: string[]) => {
-      if (s.length === 1) {
-        updateSearchGroup(idx)(s[0]);
-        //return ['\u200B']; // because stupid contenteditable
+    if (props.searchGroups.length > 1) {
+      props.setSearchGroupsFn((s: string[]) => {
+        return [...s.slice(0, idx), ...s.slice(idx + 1)];
+      });
+      let offset = 0;
+      if (idx > 0) {
+        offset = props.searchGroups[idx - 1].length;
       }
-      return [...s.slice(0, idx), ...s.slice(idx + 1)];
-    });
-    setSearchIdx(searchIdx > 0 ? searchIdx - 1 : 0);
+      setOffset(offset);
+      setSearchIdx(searchIdx > 0 ? searchIdx - 1 : 0);
+    } else {
+      updateSearchGroup(0)("", 0);
+    }
   };
 
   const splitSearchGroup = (idx: number) => (newItems: string[]) => {
