@@ -31,7 +31,6 @@ function App() {
   }, [ydoc]);
 
   const isMatch = (text: string) => {
-    if (!text.length) return true;
     for (const s of searchGroups) {
       if (s.length > 0 && !text.includes(s)) return false;
     }
